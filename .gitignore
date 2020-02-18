@@ -143,3 +143,8 @@ kernel.log
 
 # Output dir
 out
+
+#
+# Ignoring Android.bp link file
+#
+Android.bp
