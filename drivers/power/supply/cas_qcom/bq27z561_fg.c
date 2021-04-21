@@ -1391,6 +1391,7 @@ static int fg_get_property(struct power_supply *psy, enum power_supply_property 
 	int ret, status;
 	u16 flags;
 	int vbat_mv;
+	int capacity_major, capacity_minor;
 	static bool shutdown_delay_cancel;
 	static bool last_shutdown_delay;
 	union power_supply_propval pval = {0, };
@@ -1434,7 +1435,14 @@ static int fg_get_property(struct power_supply *psy, enum power_supply_property 
 			val->intval = bq->fake_soc;
 			break;
 		}
-		val->intval = bq->batt_soc;
+
+		capacity_major = bq->raw_soc / 100;
+		capacity_minor = bq->raw_soc % 100;
+		if (capacity_minor >= 50)
+			capacity_major++;
+
+		val->intval = capacity_major;
+
 		//add shutdown delay feature
 		if (bq->shutdown_delay_enable) {
 			if (val->intval == 0) {
