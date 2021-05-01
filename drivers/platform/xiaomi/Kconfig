@@ -1,0 +1,72 @@
+# Xiaomi configuration options
+
+config MACH_XIAOMI_SM8250
+	bool "Xiaomi SM8250"
+	depends on ARCH_QCOM
+	depends on ARCH_KONA
+	help
+	  Support for SM8250 Xiaomi variants
+
+menu "Xiaomi board selection"
+
+	config MACH_XIAOMI_UMI
+		bool "MI 10 board"
+		depends on MACH_XIAOMI_SM8250
+		help
+		  Support for MI 10 variant
+
+	config MACH_XIAOMI_CMI
+		bool "MI 10 Pro board"
+		depends on MACH_XIAOMI_SM8250
+		help
+		  Support for MI 10 Pro variant
+
+	config MACH_XIAOMI_LMI
+		bool "Redmi K30 Pro board"
+		depends on MACH_XIAOMI_SM8250
+		help
+		  Support for Redmi K30 Pro variant
+		  
+	config MACH_XIAOMI_CAS
+		bool "MI 10 Ultra board"
+		depends on MACH_XIAOMI_SM8250
+		help
+		  Support for MI 10 Ultra variant
+		  
+	config MACH_XIAOMI_APOLLO
+		bool "Redmi K30 Ultra board"
+		depends on MACH_XIAOMI_SM8250
+		help
+		  Support for Redmi K30 Ultra variant
+
+	config MACH_XIAOMI_ALIOTH
+		bool "Redmi K40 board"
+		depends on MACH_XIAOMI_SM8250
+		help
+		  Support for Redmi K40 variant
+
+	config MACH_XIAOMI_THYME
+		bool "MI 10S board"
+		depends on MACH_XIAOMI_SM8250
+		help
+		  Support for MI 10S variant
+
+	config MACH_XIAOMI_ELISH
+		bool "MI PAD5 Pro board"
+		depends on MACH_XIAOMI_SM8250
+		help
+		  Support for MI PAD5 Pro variant
+
+	config MACH_XIAOMI_ENUMA
+		bool "MI PAD5 Pro 5G board"
+		depends on MACH_XIAOMI_SM8250
+		help
+		  Support for MI PAD5 Pro 5G variant
+
+	config MACH_XIAOMI_PSYCHE
+		bool "MI 12X board"
+		depends on MACH_XIAOMI_SM8250
+		help
+		  Support for MI 12X variant
+
+endmenu
