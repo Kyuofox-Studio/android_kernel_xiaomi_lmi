@@ -7,18 +7,6 @@ ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
                 kona-mtp-ws-overlay.dtbo \
 		kona-sa-mtp-overlay.dtbo \
                 kona-xr-overlay.dtbo \
-                umi-sm8250-overlay.dtbo \
-                cmi-sm8250-overlay.dtbo \
-                lmi-sm8250-overlay.dtbo \
-                cas-sm8250-overlay.dtbo \
-                apollo-sm8250-overlay.dtbo \
-                alioth-sm8250-overlay.dtbo \
-                thyme-sm8250-overlay.dtbo \
-                enuma-sm8250-overlay.dtbo \
-                elish-sm8250-overlay.dtbo \
-                psyche-sm8250-overlay.dtbo \
-		munch-sm8250-overlay.dtbo \
-		dagu-sm8250-overlay.dtbo \
                 kona-rumi-overlay.dtbo \
                 kona-qrd-overlay.dtbo \
                 kona-xrfusion-overlay.dtbo \
@@ -26,6 +14,31 @@ ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
                 kona-arglass-overlay.dtbo \
                 kona-xrsku4-overlay.dtbo \
                 kona-hdk-overlay.dtbo
+
+	dtbo-$(CONFIG_MACH_XIAOMI_UMI) += \
+		umi-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_CMI) += \
+		cmi-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_LMI) += \
+		lmi-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_CAS) += \
+		cas-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_APOLLO) += \
+		apollo-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_ALIOTH) += \
+                alioth-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_THYME) += \
+                thyme-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_ENUMA) += \
+                enuma-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_ELISH) += \
+                elish-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_PSYCHE) += \
+                psyche-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_MUNCH) += \
+                munch-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_DAGU) += \
+                dagu-sm8250-overlay.dtbo
 
 kona-cdp-overlay.dtbo-base := kona-v2.1.dtb
 kona-cdp-lcd-overlay.dtbo-base := kona-v2.1.dtb
