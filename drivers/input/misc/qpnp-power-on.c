@@ -26,6 +26,7 @@
 #include <linux/regulator/driver.h>
 #include <linux/regulator/machine.h>
 #include <linux/regulator/of_regulator.h>
+#include <soc/qcom/socinfo.h>
 #include <uapi/linux/sched/types.h>
 
 #define PMIC_VER_8941				0x01
@@ -1129,6 +1130,34 @@ static int qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 	input_sync(pon->pon_input);
 
 	cfg->old_state = !!key_status;
+
+	return 0;
+}
+
+static int longpress_kthread(void *_pon)
+{
+#ifdef CONFIG_MTD_BLOCK2MTD
+	if (get_hw_version_platform() != HARDWARE_PLATFORM_PSYCHE && get_hw_version_platform() != HARDWARE_PLATFORM_DAGU) {
+		struct qpnp_pon *pon = _pon;
+		ktime_t time_to_S2, time_S2;
+		struct sched_param param = {.sched_priority = MAX_RT_PRIO-1};
+
+		sched_setscheduler(current, SCHED_FIFO, &param);
+		dev_err(pon->dev, "Long press :Start to run longpress_kthread ");
+
+		ufs_enter_h8_disable(g_shost);
+
+		long_press();
+
+		time_S2 = pon->pon_cfg->s2_timer;
+		time_to_S2 = time_S2 - ktime_ms_delta(ktime_get(), pon->time_kpdpwr_bark);
+
+		if (time_to_S2 > 0)
+			mdelay(time_to_S2);
+
+		machine_restart(NULL);
+	}
+#endif
 
 	return 0;
 }
