@@ -86,9 +86,9 @@ obj-$(CONFIG_INPUT_XEN_KBDDEV_FRONTEND)	+= xen-kbdfront.o
 obj-$(CONFIG_INPUT_YEALINK)		+= yealink.o
 obj-$(CONFIG_INPUT_IDEAPAD_SLIDEBAR)	+= ideapad_slidebar.o
 obj-$(CONFIG_XIAOMI_KEYBOARD)	+= xiaomi_keyboard/
-ifeq ($(TARGET_PRODUCT),poussin)
+ifeq ($(CONFIG_MACH_XIAOMI_NONE), y)
 obj-$(CONFIG_INPUT_AW8697_HAPTIC)	+= aw8697_haptic_l10a/
-else ifeq ($(TARGET_PRODUCT),munch)
+else ifeq ($(CONFIG_MACH_XIAOMI_MUNCH), y)
 obj-$(CONFIG_INPUT_AW8697_HAPTIC)	+= aw86927_haptic/
 else
 obj-$(CONFIG_INPUT_AW8697_HAPTIC)       += aw8697_haptic/
