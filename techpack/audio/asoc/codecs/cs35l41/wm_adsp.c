@@ -515,10 +515,7 @@ static const char *wm_vpu_fw_text[WM_VPU_NUM_FW] = {
 	[WM_VPU_FW_MISC] =	"Misc",
 };
 
-#define CAL_R_DEFAULT       11190
-#else
 #define CAL_R_DEFAULT       8392
-#endif
 
 #define AMBIENT_DEFAULT     30
 #define CAL_STATUS_DEFAULT  1
@@ -1841,7 +1838,7 @@ static int wm_adsp_create_control(struct wm_adsp *dsp,
 	struct wmfw_ctl_work *ctl_work;
 	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
 	const char *region_name;
-	int ret;
+	int ret = -1;
 
 	region_name = wm_adsp_mem_region_name(alg_region->type);
 	if (!region_name) {
