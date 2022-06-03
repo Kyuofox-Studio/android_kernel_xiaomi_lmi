@@ -236,6 +236,9 @@ ifdef CONFIG_SND_SOC_CS35L41
 else ifdef CONFIG_SND_SOC_CS35L41_K81
 	obj-y	+= cs35l41_k81/
 endif
+ifdef CONFIG_SND_SOC_TFA9874
+	obj-y	+= tfa98xx/
+endif
 	obj-y	+= rouleur/
 	obj-y	+= wsa883x/
 	obj-y	+= sdm660_cdc/
