@@ -514,11 +514,7 @@ static const char *wm_vpu_fw_text[WM_VPU_NUM_FW] = {
 	[WM_VPU_FW_MISC] =	"Misc",
 };
 
-#ifdef CONFIG_TARGET_PRODUCT_DRACO
-#define CAL_R_DEFAULT       11190
-#else
 #define CAL_R_DEFAULT       8392
-#endif
 
 #define AMBIENT_DEFAULT     30
 #define CAL_STATUS_DEFAULT  1
@@ -2260,21 +2256,9 @@ static int wm_adsp_load(struct wm_adsp *dsp)
 			snprintf(file, PAGE_SIZE,
 				 "%s", dsp->firmwares[dsp->fw].file);
 		else {
-#if defined(CONFIG_TARGET_PRODUCT_MONET) || defined(CONFIG_TARGET_PRODUCT_VANGOGH) || defined(CONFIG_AUDIO_SMARTPA_STEREO)
-			if(dsp->chip_revid == 0xB2) {
-				snprintf(file, PAGE_SIZE, "%s-%s%d-%s-revb2.wmfw",
-					 dsp->part, wm_adsp_arch_text_lower(dsp->type),
-					 dsp->num, dsp->firmwares[dsp->fw].file);
-			} else {
-				snprintf(file, PAGE_SIZE, "%s-%s%d-%s.wmfw",
-					 dsp->part, wm_adsp_arch_text_lower(dsp->type),
-					 dsp->num, dsp->firmwares[dsp->fw].file);
-			}
-#else
 			snprintf(file, PAGE_SIZE, "%s-%s%d-%s.wmfw",
 				 dsp->part, wm_adsp_arch_text_lower(dsp->type),
 				 dsp->num, dsp->firmwares[dsp->fw].file);
-#endif
 
 		}
 		break;
@@ -3192,28 +3176,8 @@ static int wm_adsp_load_coeff(struct wm_adsp *dsp)
 		snprintf(file, PAGE_SIZE, "%s-dsp%d-%s.bin", dsp->part,
 			 dsp->num, dsp->firmwares[dsp->fw].binfile);
 	else
-#if defined(CONFIG_TARGET_PRODUCT_MONET) || defined(CONFIG_TARGET_PRODUCT_VANGOGH) || defined(CONFIG_AUDIO_SMARTPA_STEREO)
-		if(dsp->chip_revid == 0xB2) {
-			//for B2 chip
-			if (dsp->component->name_prefix)
-				snprintf(file, PAGE_SIZE, "%s-dsp%d-%s-%s-revb2.bin", dsp->part,
-					dsp->num, dsp->firmwares[dsp->fw].file, dsp->component->name_prefix);
-			else
-				snprintf(file, PAGE_SIZE, "%s-dsp%d-%s-revb2.bin", dsp->part,
-					dsp->num, dsp->firmwares[dsp->fw].file);
-		} else {
-			//for B0 chip
-			if (dsp->component->name_prefix)
-				snprintf(file, PAGE_SIZE, "%s-dsp%d-%s-%s.bin", dsp->part,
-					dsp->num, dsp->firmwares[dsp->fw].file, dsp->component->name_prefix);
-			else
-				snprintf(file, PAGE_SIZE, "%s-dsp%d-%s.bin", dsp->part,
-					dsp->num, dsp->firmwares[dsp->fw].file);
-		}
-#else
 		snprintf(file, PAGE_SIZE, "%s-dsp%d-%s.bin", dsp->part,
 			 dsp->num, dsp->firmwares[dsp->fw].file);
-#endif
 
 
 	file[PAGE_SIZE - 1] = '\0';
@@ -4418,19 +4382,19 @@ static int wm_halo_apply_calibration(struct snd_soc_dapm_widget *w)
 				wm_adsp_k_ctl_put(dsp, "RCV DSP1X Protection cd CAL_STATUS", dsp->cal_status);
 				wm_adsp_k_ctl_put(dsp, "RCV DSP1X Protection cd CAL_CHECKSUM", dsp->cal_chksum);
 				//hold time = 0x96
-#ifndef CONFIG_TARGET_PRODUCT_PSYCHE
+#ifndef CONFIG_MACH_XIAOMI_PSYCHE
 				wm_adsp_k_ctl_put(dsp, "RCV DSP1X Protection 400a4 OFFSET_HOLD_TIME", 150);
 #endif
 				wm_adsp_k_ctl_get(dsp, "RCV DSP1X Protection cd CAL_R");
 				wm_adsp_k_ctl_get(dsp, "RCV DSP1X Protection cd CAL_STATUS");
 				wm_adsp_k_ctl_get(dsp, "RCV DSP1X Protection cd CAL_CHECKSUM");
 				//for ultrasonic
-#if defined(CONFIG_TARGET_PRODUCT_APOLLO) || defined(CONFIG_TARGET_PRODUCT_CAS) || defined (CONFIG_TARGET_PRODUCT_ALIOTH) || defined (CONFIG_TARGET_PRODUCT_PSYCHE)
+#if defined(CONFIG_MACH_XIAOMI_APOLLO) || defined(CONFIG_MACH_XIAOMI_CAS) || defined (CONFIG_MACH_XIAOMI_ALIOTH) || defined (CONFIG_MACH_XIAOMI_PSYCHE)
 				wm_adsp_k_ctl_put(dsp, "RCV DSP1X Protection 400a4 E_FULL_US_BYPASS", 1);
 				wm_adsp_k_ctl_get(dsp, "RCV DSP1X Protection 400a4 E_FULL_US_BYPASS");
 #endif
 
-#ifdef CONFIG_TARGET_PRODUCT_PSYCHE
+#ifdef CONFIG_MACH_XIAOMI_PSYCHE
 			//for lrclk delay
 			wm_adsp_k_ctl_put(dsp, "RCV DSP1X Protection 400a4 MAX_LRCLK_DELAY", 0x20);
 #endif
@@ -4438,7 +4402,7 @@ static int wm_halo_apply_calibration(struct snd_soc_dapm_widget *w)
 				wm_adsp_k_ctl_put(dsp, "DSP1X Protection cd CAL_R", dsp->cal_z);
 				wm_adsp_k_ctl_put(dsp, "DSP1X Protection cd CAL_STATUS", dsp->cal_status);
 				wm_adsp_k_ctl_put(dsp, "DSP1X Protection cd CAL_CHECKSUM", dsp->cal_chksum);
-#ifdef CONFIG_TARGET_PRODUCT_PSYCHE
+#ifdef CONFIG_MACH_XIAOMI_PSYCHE
                 //for lrclk delay
 				wm_adsp_k_ctl_put(dsp, "DSP1X Protection 400a4 MAX_LRCLK_DELAY", 0x20);
 				//hold time = 0x96
