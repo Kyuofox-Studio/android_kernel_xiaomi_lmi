@@ -1747,7 +1747,7 @@ out:
 
 static int ufshcd_clock_scaling_prepare(struct ufs_hba *hba)
 {
-	#define DOORBELL_CLR_TOUT_US		(1000 * 1000) /* 1 sec */
+	#define DOORBELL_CLR_TOUT_US		(2000 * 1000) /* 2 sec */
 	int ret = 0;
 	/*
 	 * make sure that there are no outstanding requests when
@@ -1933,8 +1933,16 @@ static int ufshcd_devfreq_target(struct device *dev,
 	}
 	spin_unlock_irqrestore(hba->host->host_lock, irq_flags);
 
+	pm_runtime_get_noresume(hba->dev);
+	if (!pm_runtime_active(hba->dev)) {
+		pm_runtime_put_noidle(hba->dev);
+		ret = -EAGAIN;
+		goto out;
+	}
 	start = ktime_get();
 	ret = ufshcd_devfreq_scale(hba, scale_up);
+	pm_runtime_put(hba->dev);
+
 	trace_ufshcd_profile_clk_scaling(dev_name(hba->dev),
 		(scale_up ? "up" : "down"),
 		ktime_to_us(ktime_sub(ktime_get(), start)), ret);
@@ -3067,6 +3075,20 @@ static void ufshcd_clk_scaling_update_busy(struct ufs_hba *hba)
 static inline
 int ufshcd_send_command(struct ufs_hba *hba, unsigned int task_tag)
 {
+	if (hba->lrb[task_tag].cmd) {
+		u8 opcode = (u8)(*hba->lrb[task_tag].cmd->cmnd);
+
+		if (opcode == SECURITY_PROTOCOL_OUT && hba->security_in) {
+			hba->security_in--;
+		} else if (opcode == SECURITY_PROTOCOL_IN) {
+			if (hba->security_in) {
+				WARN_ON(1);
+				return -EINVAL;
+			}
+			hba->security_in++;
+		}
+	}
+
 	hba->lrb[task_tag].issue_time_stamp = ktime_get();
 	hba->lrb[task_tag].compl_time_stamp = ktime_set(0, 0);
 	ufshcd_cond_add_cmd_trace(hba, task_tag,
@@ -3857,7 +3879,13 @@ static int ufshcd_queuecommand(struct Scsi_Host *host, struct scsi_cmnd *cmd)
 		ufshcd_vops_pm_qos_req_end(hba, cmd->request, true);
 		dev_err(hba->dev, "%s: failed sending command, %d\n",
 							__func__, err);
-		err = DID_ERROR;
+		if (err == -EINVAL) {
+			set_host_byte(cmd, DID_ERROR);
+			if (has_read_lock)
+				ufshcd_put_read_lock(hba);
+			cmd->scsi_done(cmd);
+			return 0;
+		}
 		goto out;
 	}
 
@@ -4955,7 +4983,7 @@ static int ufshcd_dme_enable(struct ufs_hba *hba)
 	ret = ufshcd_send_uic_cmd(hba, &uic_cmd);
 	if (ret)
 		dev_err(hba->dev,
-			"dme-reset: error code %d\n", ret);
+			"dme-enable: error code %d\n", ret);
 
 	return ret;
 }
@@ -7879,19 +7907,16 @@ static int ufshcd_eh_device_reset_handler(struct scsi_cmnd *cmd)
 {
 	struct Scsi_Host *host;
 	struct ufs_hba *hba;
-	unsigned int tag;
 	u32 pos;
 	int err;
-	u8 resp = 0xF;
-	struct ufshcd_lrb *lrbp;
+	u8 resp = 0xF, lun;
 	unsigned long flags;
 
 	host = cmd->device->host;
 	hba = shost_priv(host);
-	tag = cmd->request->tag;
 
-	lrbp = &hba->lrb[tag];
-	err = ufshcd_issue_tm_cmd(hba, lrbp->lun, 0, UFS_LOGICAL_RESET, &resp);
+	lun = ufshcd_scsi_to_upiu_lun(cmd->device->lun);
+	err = ufshcd_issue_tm_cmd(hba, lun, 0, UFS_LOGICAL_RESET, &resp);
 	if (err || resp != UPIU_TASK_MANAGEMENT_FUNC_COMPL) {
 		if (!err)
 			err = resp;
@@ -7900,7 +7925,7 @@ static int ufshcd_eh_device_reset_handler(struct scsi_cmnd *cmd)
 
 	/* clear the commands that were pending for corresponding LUN */
 	for_each_set_bit(pos, &hba->outstanding_reqs, hba->nutrs) {
-		if (hba->lrb[pos].lun == lrbp->lun) {
+		if (hba->lrb[pos].lun == lun) {
 			err = ufshcd_clear_cmd(hba, pos);
 			if (err)
 				break;
@@ -10438,7 +10463,10 @@ static int ufshcd_suspend(struct ufs_hba *hba, enum ufs_pm_op pm_op)
 	      && !hba->wb_buf_flush_enabled) ||
 	     !ufshcd_is_runtime_pm(pm_op))) {
 		/* ensure that bkops is disabled */
-		ufshcd_disable_auto_bkops(hba);
+		ret = ufshcd_disable_auto_bkops(hba);
+		if (ret)
+			goto enable_gating;
+
 		ret = ufshcd_set_dev_pwr_mode(hba, req_dev_pwr_mode);
 		if (ret)
 			goto enable_gating;
@@ -10744,11 +10772,7 @@ int ufshcd_system_resume(struct ufs_hba *hba)
 	if (!hba)
 		return -EINVAL;
 
-	if (!hba->is_powered || pm_runtime_suspended(hba->dev))
-		/*
-		 * Let the runtime resume take care of resuming
-		 * if runtime suspended.
-		 */
+	if (!hba->is_powered)
 		goto out;
 	else
 		ret = ufshcd_resume(hba, UFS_SYSTEM_PM);
@@ -10756,8 +10780,15 @@ out:
 	trace_ufshcd_system_resume(dev_name(hba->dev), ret,
 		ktime_to_us(ktime_sub(ktime_get(), start)),
 		hba->curr_dev_pwr_mode, hba->uic_link_state);
-	if (!ret)
+	if (!ret) {
 		hba->is_sys_suspended = false;
+
+		if (pm_runtime_suspended(hba->dev)) {
+			pm_runtime_disable(hba->dev);
+			pm_runtime_set_active(hba->dev);
+			pm_runtime_enable(hba->dev);
+		}
+	}
 	return ret;
 }
 EXPORT_SYMBOL(ufshcd_system_resume);
@@ -10910,6 +10941,7 @@ int ufshcd_shutdown(struct ufs_hba *hba)
 	/* reqs issued from contexts other than shutdown will fail from now */
 	ufshcd_scsi_unblock_requests(hba);
 	ufshcd_release_all(hba);
+
 	ret = ufshcd_suspend(hba, UFS_SHUTDOWN_PM);
 out:
 	if (ret)
@@ -11030,6 +11062,13 @@ int ufshcd_init(struct ufs_hba *hba, void __iomem *mmio_base, unsigned int irq)
 	struct Scsi_Host *host = hba->host;
 	struct device *dev = hba->dev;
 	char recovery_wq_name[sizeof("ufs_recovery_00")];
+
+	/*
+	 * dev_set_drvdata() must be called before any callbacks are registered
+	 * that use dev_get_drvdata() (frequency scaling, clock scaling, hwmon,
+	 * sysfs).
+	 */
+	dev_set_drvdata(dev, hba);
 
 	if (!mmio_base) {
 		dev_err(hba->dev,
