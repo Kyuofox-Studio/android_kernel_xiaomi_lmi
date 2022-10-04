@@ -163,7 +163,9 @@ struct cam_fd_hw_release_args {
 struct cam_fd_hw_init_args {
 	void    *hw_ctx;
 	void    *ctx_hw_private;
+#ifndef CONFIG_MACH_XIAOMI_CAS
     bool     reset_required;
+#endif
 };
 
 /**

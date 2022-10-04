@@ -536,9 +536,15 @@ static void __cam_req_mgr_validate_crm_wd_timer(
 	CAM_DBG(CAM_CRM,
 		"rd_idx: %d idx: %d current_frame_timeout: %d ms",
 		in_q->rd_idx, idx, current_frame_timeout);
+#ifndef CONFIG_MACH_XIAOMI_CAS
 	if (link->watchdog == NULL) {
+#else
+	if (link->watchdog == NULL)
+#endif
 		CAM_ERR(CAM_CRM, "watchdog == null,link:%p", link);
+#ifndef CONFIG_MACH_XIAOMI_CAS
 	} else {
+#endif
 		if ((next_frame_timeout + CAM_REQ_MGR_WATCHDOG_TIMEOUT) >
 			link->watchdog->expires) {
 			CAM_DBG(CAM_CRM,
@@ -564,7 +570,9 @@ static void __cam_req_mgr_validate_crm_wd_timer(
 			crm_timer_modify(link->watchdog,
 				CAM_REQ_MGR_WATCHDOG_TIMEOUT);
 		}
+#ifndef CONFIG_MACH_XIAOMI_CAS
 	}
+#endif
 }
 
 /**

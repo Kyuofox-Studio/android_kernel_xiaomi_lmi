@@ -660,6 +660,15 @@ irqreturn_t cam_hw_cdm_irq(int irq_num, void *data)
 				&payload->irq_status)) {
 			CAM_ERR(CAM_CDM, "Failed to read CDM HW IRQ status");
 		}
+#ifdef CONFIG_MACH_XIAOMI_CAS
+		if (!payload->irq_status) {
+			CAM_ERR_RATE_LIMIT(CAM_CDM, "Invalid irq received\n");
+			kfree(payload);
+			return IRQ_HANDLED;
+		}
+		if (payload->irq_status &
+			CAM_CDM_IRQ_STATUS_INFO_INLINE_IRQ_MASK) {
+#else
         if (!payload->irq_status) {
             CAM_ERR_RATE_LIMIT(CAM_CDM, "Invalid irq received\n");
             kfree(payload);
@@ -672,6 +681,7 @@ irqreturn_t cam_hw_cdm_irq(int irq_num, void *data)
             CAM_ERR(CAM_CDM, "Failed to Write CDM HW IRQ cmd");
         if (payload->irq_status &
             CAM_CDM_IRQ_STATUS_INFO_INLINE_IRQ_MASK) {
+#endif
 			if (cam_cdm_read_hw_reg(cdm_hw, CDM_IRQ_USR_DATA,
 				&payload->irq_data)) {
 				CAM_ERR(CAM_CDM,
@@ -682,6 +692,13 @@ irqreturn_t cam_hw_cdm_irq(int irq_num, void *data)
 		payload->hw = cdm_hw;
 		INIT_WORK((struct work_struct *)&payload->work,
 			cam_hw_cdm_work);
+#ifdef CONFIG_MACH_XIAOMI_CAS
+		if (cam_cdm_write_hw_reg(cdm_hw, CDM_IRQ_CLEAR,
+			payload->irq_status))
+			CAM_ERR(CAM_CDM, "Failed to Write CDM HW IRQ Clear");
+		if (cam_cdm_write_hw_reg(cdm_hw, CDM_IRQ_CLEAR_CMD, 0x01))
+			CAM_ERR(CAM_CDM, "Failed to Write CDM HW IRQ cmd");
+#endif
 		work_status = queue_work(cdm_core->work_queue, &payload->work);
 		if (work_status == false) {
 			CAM_ERR(CAM_CDM, "Failed to queue work for irq=0x%x",

@@ -462,6 +462,9 @@ struct cam_ife_csid_cid_data {
 	uint32_t                     cnt;
 	uint32_t                     tpg_set;
 	uint32_t                     is_valid_vc1_dt1;
+#ifdef CONFIG_MACH_XIAOMI_CAS
+	uint32_t                     init_cnt;
+#endif
 };
 
 

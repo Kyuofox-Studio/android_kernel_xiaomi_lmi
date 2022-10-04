@@ -368,6 +368,7 @@ long cam_soc_util_get_clk_round_rate(struct cam_hw_soc_info *soc_info,
 	return clk_round_rate(soc_info->clk[clk_index], clk_rate);
 }
 
+#ifndef CONFIG_MACH_XIAOMI_CAS
 int cam_soc_util_set_clk_flags(struct cam_hw_soc_info *soc_info,
 	uint32_t clk_index, unsigned long flags)
 {
@@ -379,6 +380,7 @@ int cam_soc_util_set_clk_flags(struct cam_hw_soc_info *soc_info,
 
 	return clk_set_flags(soc_info->clk[clk_index], flags);
 }
+#endif
 
 /**
  * cam_soc_util_set_clk_rate()

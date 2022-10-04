@@ -124,7 +124,11 @@ static int __cam_fd_ctx_flush_dev_in_activated(struct cam_context *ctx,
 
 	rc = cam_context_flush_dev_to_hw(ctx, cmd);
 	if (rc)
+#ifdef CONFIG_MACH_XIAOMI_CAS
+		CAM_ERR(CAM_ICP, "Failed to flush device, rc=%d", rc);
+#else
 		CAM_ERR(CAM_FD, "Failed to flush device, rc=%d", rc);
+#endif
 
 	return rc;
 }

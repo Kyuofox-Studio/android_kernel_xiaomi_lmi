@@ -71,6 +71,7 @@ static int cam_fd_hw_soc_util_setup_regbase_indices(
 	return 0;
 }
 
+#ifndef CONFIG_MACH_XIAOMI_CAS
 static int cam_fd_soc_set_clk_flags(struct cam_hw_soc_info *soc_info)
 {
 	int i, rc = 0;
@@ -103,6 +104,7 @@ static int cam_fd_soc_set_clk_flags(struct cam_hw_soc_info *soc_info)
 
 	return rc;
 }
+#endif
 
 void cam_fd_soc_register_write(struct cam_hw_soc_info *soc_info,
 	enum cam_fd_reg_base reg_base, uint32_t reg_offset, uint32_t reg_value)
@@ -229,11 +231,13 @@ int cam_fd_soc_init_resources(struct cam_hw_soc_info *soc_info,
 		return rc;
 	}
 
+#ifndef CONFIG_MACH_XIAOMI_CAS
 	rc = cam_fd_soc_set_clk_flags(soc_info);
 	if (rc) {
 		CAM_ERR(CAM_FD, "failed in set_clk_flags rc=%d", rc);
 		goto release_res;
 	}
+#endif
 
 	soc_private = kzalloc(sizeof(struct cam_fd_soc_private), GFP_KERNEL);
 	if (!soc_private) {

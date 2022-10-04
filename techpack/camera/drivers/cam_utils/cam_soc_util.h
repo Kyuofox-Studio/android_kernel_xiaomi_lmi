@@ -371,6 +371,7 @@ int cam_soc_util_disable_platform_resource(struct cam_hw_soc_info *soc_info,
 long cam_soc_util_get_clk_round_rate(struct cam_hw_soc_info *soc_info,
 	uint32_t clk_index, unsigned long clk_rate);
 
+#ifndef CONFIG_MACH_XIAOMI_CAS
 /**
  * cam_soc_util_set_clk_flags()
  *
@@ -384,6 +385,7 @@ long cam_soc_util_get_clk_round_rate(struct cam_hw_soc_info *soc_info,
  */
 int cam_soc_util_set_clk_flags(struct cam_hw_soc_info *soc_info,
 	 uint32_t clk_index, unsigned long flags);
+#endif
 
 /**
  * cam_soc_util_set_src_clk_rate()

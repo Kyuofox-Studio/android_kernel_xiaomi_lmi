@@ -143,6 +143,9 @@ struct cam_isp_resource_node {
 	void                          *tasklet_info;
 	int                            irq_handle;
 	int                            rdi_only_ctx;
+#ifdef CONFIG_MACH_XIAOMI_CAS
+	int                            rdi_only_last_res;
+#endif
 
 	int (*init)(struct cam_isp_resource_node *rsrc_node,
 		void *init_args, uint32_t arg_size);

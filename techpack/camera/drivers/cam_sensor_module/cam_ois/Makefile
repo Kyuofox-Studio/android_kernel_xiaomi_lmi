@@ -12,3 +12,6 @@ ccflags-y += -I$(srctree)/techpack/camera/drivers/cam_smmu
 ccflags-y += -I$(srctree)/techpack/camera/drivers/cam_core/
 
 obj-$(CONFIG_SPECTRA_CAMERA) += cam_ois_dev.o cam_ois_core.o cam_ois_soc.o
+ifeq ($(CONFIG_MACH_XIAOMI_CAS), y)
+obj-$(CONFIG_SPECTRA_CAMERA) += Sem1215.o
+endif
