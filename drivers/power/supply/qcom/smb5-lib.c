@@ -2480,7 +2480,7 @@ static void smblib_check_input_status(struct smb_charger *chg)
 	if ((input_present & INPUT_PRESENT_DC
 			|| input_present & INPUT_PRESENT_USB)
 				&& !off_charge_flag
-				&& (vbat_uv <= CUTOFF_VOL_THR)) {
+				&& (vbat_uv <= (CUTOFF_VOL_THR - 200))) {
 		chg->report_input_absent = true;
 		power_supply_changed(chg->batt_psy);
 	}
@@ -11524,13 +11524,15 @@ static int smblib_dynamic_recharge_vbat(struct smb_charger *chg)
 	} else
 		return 0;
 
-	rc = power_supply_set_property(chg->batt_psy,
-			POWER_SUPPLY_PROP_RECHARGE_VBAT,
-			&val);
-	if (rc < 0) {
-		dev_err(chg->dev, "Couldn't set POWER_SUPPLY_PROP_CHARGER_TEMP_MAX rc=%d\n",
-				rc);
-		return -EINVAL;
+	if (chg->batt_psy) {
+		rc = power_supply_set_property(chg->batt_psy,
+				POWER_SUPPLY_PROP_RECHARGE_VBAT,
+				&val);
+		if (rc < 0) {
+			dev_err(chg->dev, "Couldn't set POWER_SUPPLY_PROP_CHARGER_TEMP_MAX rc=%d\n",
+					rc);
+			return -EINVAL;
+		}
 	}
 
 	return 0;
