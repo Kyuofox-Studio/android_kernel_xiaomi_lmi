@@ -378,6 +378,7 @@ struct sde_crtc {
 	int hist_irq_idx;
 
 	int comp_ratio;
+	uint32_t mi_dimlayer_type;
 
 	struct drm_property_blob *dspp_blob_info;
 };
