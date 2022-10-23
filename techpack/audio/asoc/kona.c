@@ -141,6 +141,25 @@ struct snd_soc_dai_link_component cs35l41_codec_components[] = {
                .dai_name = "cs35l41.1-0042",
        },
 };
+#elif defined(CONFIG_MACH_XIAOMI_DAGU)
+struct snd_soc_dai_link_component cs35l41_codec_components[] = {
+       {
+               .name = "cs35l41.1-0040",
+               .dai_name = "cs35l41.1-0040",
+       },
+       {
+               .name = "cs35l41.1-0041",
+               .dai_name = "cs35l41.1-0041",
+       },
+       {
+               .name = "cs35l41.3-0041",
+               .dai_name = "cs35l41.3-0041",
+       },
+       {
+               .name = "cs35l41.3-0043",
+               .dai_name = "cs35l41.3-0043",
+       },
+};
 #else
 struct snd_soc_dai_link_component cs35l41_codec_components[] = {
 	{
@@ -197,7 +216,7 @@ enum {
 	TDM_PORT_MAX,
 };
 
-#ifdef CONFIG_MACH_XIAOMI_PSYCHE
+#if defined(CONFIG_MACH_XIAOMI_PSYCHE) || defined(CONFIG_MACH_XIAOMI_DAGU)
 #define TDM_MAX_SLOTS 4
 #else
 #define TDM_MAX_SLOTS 8
@@ -603,7 +622,7 @@ static struct tdm_dev_config pri_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 		{ {0xFFFF} }, /* RX_7 */
 	},
 	{
-#ifdef CONFIG_MACH_XIAOMI_PSYCHE
+#if defined(CONFIG_MACH_XIAOMI_PSYCHE) || defined(CONFIG_MACH_XIAOMI_DAGU)
 		{ {0,   4, 0xFFFF} }, /* TX_0 */
 #else
 		{ {0,   4,      8, 12, 0xFFFF} }, /* TX_0 */
@@ -645,6 +664,8 @@ static struct tdm_dev_config tert_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 	{ /* TERT TDM */
 #if defined(CONFIG_MACH_XIAOMI_ENUMA) || defined(CONFIG_MACH_XIAOMI_ELISH)
 		{ {0,   4, 8, 12, 16, 20, 24, 28} }, /* RX_0 */
+#elif defined(CONFIG_MACH_XIAOMI_DAGU)
+		{ {0,   4, 8, 12} }, /* RX_0 */
 #else
 		{ {0,   4, 0xFFFF} }, /* RX_0 */
 #endif
@@ -6415,7 +6436,7 @@ static struct snd_soc_dai_link msm_common_dai_links[] = {
 		.ops = &msm_fe_qos_ops,
 	},
 	{/* hw:x,30 */
-#if defined(CONFIG_MACH_XIAOMI_APOLLO) || defined(CONFIG_MACH_XIAOMI_CAS) || defined(CONFIG_MACH_XIAOMI_ALIOTH) || defined(CONFIG_MACH_XIAOMI_ENUMA) || defined(CONFIG_MACH_XIAOMI_ELISH) || defined(CONFIG_MACH_XIAOMI_PSYCHE)
+#if defined(CONFIG_MACH_XIAOMI_APOLLO) || defined(CONFIG_MACH_XIAOMI_CAS) || defined(CONFIG_MACH_XIAOMI_ALIOTH) || defined(CONFIG_MACH_XIAOMI_ENUMA) || defined(CONFIG_MACH_XIAOMI_ELISH) || defined(CONFIG_MACH_XIAOMI_PSYCHE) || defined(CONFIG_MACH_XIAOMI_DAGU)
 		.name = "Tertiary TDM1 Hostless Playback",
 		.stream_name = "Tertiary TDM1 Hostless Playback",
 		.cpu_dai_name = "msm-dai-q6-tdm.36898",
@@ -7311,7 +7332,7 @@ static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
 
 #ifdef CONFIG_SND_SOC_CS35L41
 static struct snd_soc_dai_link tert_mi2s_rx_cs35l41_dai_links[] = {
-#if defined(CONFIG_MACH_XIAOMI_APOLLO) || defined(CONFIG_MACH_XIAOMI_CAS)  || defined(CONFIG_MACH_XIAOMI_ALIOTH) || defined(CONFIG_MACH_XIAOMI_ENUMA) || defined(CONFIG_MACH_XIAOMI_ELISH) || defined(CONFIG_MACH_XIAOMI_PSYCHE)
+#if defined(CONFIG_MACH_XIAOMI_APOLLO) || defined(CONFIG_MACH_XIAOMI_CAS)  || defined(CONFIG_MACH_XIAOMI_ALIOTH) || defined(CONFIG_MACH_XIAOMI_ENUMA) || defined(CONFIG_MACH_XIAOMI_ELISH) || defined(CONFIG_MACH_XIAOMI_PSYCHE) || defined(CONFIG_MACH_XIAOMI_DAGU)
 	{
 		.name = LPASS_BE_TERT_TDM_RX_0,
 		.stream_name = "Tertiary TDM0 Playback",

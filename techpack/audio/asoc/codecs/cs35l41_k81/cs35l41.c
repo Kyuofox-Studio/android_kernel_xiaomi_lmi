@@ -2265,7 +2265,7 @@ static int cs35l41_pcm_hw_params(struct snd_pcm_substream *substream,
 
 #if defined(CONFIG_MACH_XIAOMI_ENUMA) || defined(CONFIG_MACH_XIAOMI_ELISH)
 	cs35l41_component_set_sysclk(dai->component, 0, 0, 8 * rate * asp_width, 0);
-#elif defined(CONFIG_TARGET_PRODUCT_DAGU)
+#elif defined(CONFIG_MACH_XIAOMI_DAGU)
 	cs35l41_component_set_sysclk(dai->component, 0, 0, 4 * rate * asp_width, 0);
 #else
 	cs35l41_component_set_sysclk(dai->component, 0, 0, 2 * rate * asp_width, 0);

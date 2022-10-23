@@ -27,7 +27,7 @@
 #include "bolero/bolero-cdc.h"
 #include <asoc/wcd-mbhc-v2-api.h>
 
-#if defined(CONFIG_MACH_XIAOMI_PSYCHE) || defined(CONFIG_MACH_XIAOMI_MUNCH)
+#if defined(CONFIG_MACH_XIAOMI_PSYCHE) || defined(CONFIG_MACH_XIAOMI_MUNCH) || defined(CONFIG_MACH_XIAOMI_DAGU)
 
 #define HEADSET_STATUS_RECORD_INDEX_PLUGIN_HEADSET (3)
 #define HEADSET_STATUS_RECORD_INDEX_PLUGIN_HEADPHONE (1)
@@ -77,13 +77,13 @@ void wcd_mbhc_jack_report(struct wcd_mbhc *mbhc,
 			  struct snd_soc_jack *jack, int status, int mask)
 {
 	snd_soc_jack_report(jack, status, mask);
-#if defined(CONFIG_MACH_XIAOMI_PSYCHE) || defined(CONFIG_MACH_XIAOMI_MUNCH)
+#if defined(CONFIG_MACH_XIAOMI_PSYCHE) || defined(CONFIG_MACH_XIAOMI_MUNCH) || defined(CONFIG_MACH_XIAOMI_DAGU)
 	add_headset_event(mbhc->hph_status, mask, jack->status);
 #endif
 }
 EXPORT_SYMBOL(wcd_mbhc_jack_report);
 
-#if defined(CONFIG_MACH_XIAOMI_PSYCHE) || defined(CONFIG_MACH_XIAOMI_MUNCH)
+#if defined(CONFIG_MACH_XIAOMI_PSYCHE) || defined(CONFIG_MACH_XIAOMI_MUNCH) || defined(CONFIG_MACH_XIAOMI_DAGU)
 static void add_headset_event(int status, int mask, int jackstatus) {
 	if (status == HEADSET_STATUS_RECORD_INDEX_PLUGOUT) {
 		headset_status[4] = maxF(headset_status[4], HEADSET_EVENT_PLUGOUT_HEADPHONE);
@@ -1763,6 +1763,7 @@ static int wcd_mbhc_non_usb_c_event_changed(struct notifier_block *nb,
 static int wcd_mbhc_usbc_ana_event_handler(struct notifier_block *nb,
 					   unsigned long mode, void *ptr)
 {
+	u8 det_status = 0;
 	struct wcd_mbhc *mbhc = container_of(nb, struct wcd_mbhc, fsa_nb);
 
 	if (!mbhc)
@@ -1778,6 +1779,20 @@ static int wcd_mbhc_usbc_ana_event_handler(struct notifier_block *nb,
 		/* insertion detected, enable L_DET_EN */
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_L_DET_EN, 0);
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_L_DET_EN, 1);
+		WCD_MBHC_REG_READ(WCD_MBHC_L_DET_EN, det_status);
+	} else if (mode == POWER_SUPPLY_TYPEC_NONE && mbhc->current_plug == MBHC_PLUG_TYPE_NONE) {
+		mbhc->hs_detect_work_stop = true;
+		/* Disable HW FSM */
+		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_FSM_EN, 0);
+		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_BTN_ISRC_CTL, 0);
+		mbhc->extn_cable_hph_rem = false;
+
+		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_L_DET_EN, 0);
+		if (mbhc->mbhc_cb->clk_setup)
+		    mbhc->mbhc_cb->clk_setup(mbhc->component, false);
+		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_MECH_DETECTION_TYPE, 1);
+
+		WCD_MBHC_REG_READ(WCD_MBHC_L_DET_EN, det_status);
 	}
 	return 0;
 }
