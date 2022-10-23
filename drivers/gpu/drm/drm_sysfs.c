@@ -366,9 +366,28 @@ static ssize_t gamma_test_show(struct device *dev,
 	return ret;
 }
 
+static ssize_t disp_count_store(struct device *device,
+			   struct device_attribute *attr,
+			   const char *buf, size_t count)
+{
+	struct drm_connector *connector = to_drm_connector(device);
+	int ret;
+
+	ret = dsi_display_count_set(connector, buf);
+
+	return ret ? ret : count;
+}
+
 extern ssize_t smart_fps_value_show(struct device *device,
 			   struct device_attribute *attr,
 			   char *buf);
+
+static ssize_t disp_count_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	struct drm_connector *connector = to_drm_connector(dev);
+	return dsi_display_count_get(connector, buf);
+}
 
 static ssize_t fod_ui_ready_show(struct device *device,
 			   struct device_attribute *attr,
@@ -427,10 +446,6 @@ static ssize_t disp_pcc_store(struct device *device,
 		&color_transform_pcc_cfg.b.b);
 
 	ret = 0;
-	pr_info("set pcc r_c=%d r_r=%d r_g=%d r_b=%d g_c=%d g_r=%d g_g=%d g_b=%d b_c=%d b_r=%d b_g=%d b_b=%d",
-		color_transform_pcc_cfg.r.c, color_transform_pcc_cfg.r.r, color_transform_pcc_cfg.r.g, color_transform_pcc_cfg.r.b,
-		color_transform_pcc_cfg.g.c, color_transform_pcc_cfg.g.r, color_transform_pcc_cfg.g.g, color_transform_pcc_cfg.g.b,
-		color_transform_pcc_cfg.b.c, color_transform_pcc_cfg.b.r, color_transform_pcc_cfg.b.g, color_transform_pcc_cfg.b.b);
 
 	return ret ? ret : count;
 }
@@ -540,6 +555,7 @@ static DEVICE_ATTR_RO(wp_info);
 static DEVICE_ATTR_RO(dynamic_fps);
 static DEVICE_ATTR_RW(doze_brightness);
 static DEVICE_ATTR_RO(gamma_test);
+static DEVICE_ATTR_RW(disp_count);
 static DEVICE_ATTR_RO(fod_ui_ready);
 static DEVICE_ATTR_RO(smart_fps_value);
 static DEVICE_ATTR_RO(complete_commit_time);
@@ -560,6 +576,7 @@ static struct attribute *connector_dev_attrs[] = {
 	&dev_attr_dynamic_fps.attr,
 	&dev_attr_doze_brightness.attr,
 	&dev_attr_gamma_test.attr,
+	&dev_attr_disp_count.attr,
 	&dev_attr_fod_ui_ready.attr,
 	&dev_attr_smart_fps_value.attr,
 	&dev_attr_complete_commit_time.attr,
