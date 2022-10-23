@@ -3,7 +3,6 @@
  * FocalTech TouchScreen driver.
  *
  * Copyright (c) 2012-2020, Focaltech Ltd. All rights reserved.
- * Copyright (C) 2021-2022 XiaoMi, Inc.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -130,6 +129,8 @@
 *****************************************************************************/
 struct ftxxxx_proc {
 	struct proc_dir_entry *proc_entry;
+	struct proc_dir_entry *tp_lockdown_info_proc;
+	struct proc_dir_entry *tp_fw_version_proc;
 	struct proc_dir_entry *tp_test_data_proc;
 	struct proc_dir_entry *tp_test_result_proc;
 	struct proc_dir_entry *tp_selftest_proc;
@@ -228,12 +229,13 @@ struct fts_ts_data {
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 	struct early_suspend early_suspend;
 #endif
-
+	struct dentry *tpdbg_dentry;
 	bool poweroff_on_sleep;
 	/* power supply */
 	struct mutex power_supply_lock;
 	struct work_struct power_supply_work;
 	struct notifier_block power_supply_notifier;
+
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
 	u8 gesture_status;
 	bool gamemode_enabled;
@@ -241,9 +243,8 @@ struct fts_ts_data {
 	int palm_sensor_switch;
 	bool power_status;
 	bool is_expert_mode;
-	u8 gesture_cmd;
-	bool gesture_cmd_delay;
 #endif
+
 };
 
 enum GESTURE_MODE_TYPE {

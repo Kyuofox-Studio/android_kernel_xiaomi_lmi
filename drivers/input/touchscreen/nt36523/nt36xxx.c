@@ -25,6 +25,7 @@
 #include <linux/of_gpio.h>
 #include <linux/of_irq.h>
 #include <linux/debugfs.h>
+#include <uapi/linux/sched/types.h>
 
 #if defined(CONFIG_FB)
 #ifdef CONFIG_DRM
@@ -1637,6 +1638,14 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 	uint32_t pen_btn2 = 0;
 	uint32_t pen_battery = 0;
 
+	static struct task_struct *touch_task = NULL;
+	struct sched_param par = { .sched_priority = MAX_RT_PRIO / 2};
+
+	if (touch_task == NULL) {
+		touch_task = current;
+		sched_setscheduler_nocheck(touch_task, SCHED_FIFO, &par);
+	}
+
 #if WAKEUP_GESTURE
 	if (bTouchIsAwake == 0) {
 		pm_wakeup_event(&ts->input_dev->dev, 5000);
@@ -2932,8 +2941,8 @@ static int32_t nvt_ts_probe(struct spi_device *client)
 		ts->pen_input_dev->propbit[0] = BIT(INPUT_PROP_DIRECT);
 
 		if (ts->wgp_stylus) {
-			input_set_abs_params(ts->pen_input_dev, ABS_X, 0, ts->abs_x_max * 2 - 1, 0, 0);
-			input_set_abs_params(ts->pen_input_dev, ABS_Y, 0, ts->abs_y_max * 2 - 1, 0, 0);
+			input_set_abs_params(ts->pen_input_dev, ABS_X, 0, ts->abs_x_max * 8 - 1, 0, 0);
+			input_set_abs_params(ts->pen_input_dev, ABS_Y, 0, ts->abs_y_max * 8 - 1, 0, 0);
 		} else {
 			input_set_abs_params(ts->pen_input_dev, ABS_X, 0, ts->abs_x_max - 1, 0, 0);
 			input_set_abs_params(ts->pen_input_dev, ABS_Y, 0, ts->abs_y_max - 1, 0, 0);

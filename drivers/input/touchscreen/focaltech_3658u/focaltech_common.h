@@ -3,7 +3,6 @@
  * FocalTech fts TouchScreen driver.
  *
  * Copyright (c) 2012-2020, Focaltech Ltd. All rights reserved.
- * Copyright (C) 2021-2022 XiaoMi, Inc.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -100,7 +99,7 @@
 #define FTS_REG_SENSIVITY                   0x9d
 #define FTS_REG_THDIFF                      0x85
 #define FTS_REG_MONITOR_MODE                0x86
-#define FTS_REG_TIME_ENTER_MONITOR          0x87
+#define FTS_REG_TIME_ENTER_MONITOR		0x87
 #define FTS_REG_ORIENTATION                 0x8c
 #define FTS_REG_EDGE_FILTER_LEVEL           0x9c
 #define FTS_REG_GAMEMODE                    0xc1
@@ -109,10 +108,6 @@
 #define FTS_PALM_DATA                       0x01
 #define FTS_PALM_ON                         0x05
 #define FTS_PALM_OFF                        0x00
-
-#define FTS_GESTURE_CTRL                    0xD1
-#define FTS_GESTURE_DOUBLETAP               0x04
-#define FTS_GESTURE_AOD                     0x07
 
 #define FTS_SYSFS_ECHO_ON(buf)      (buf[0] == '1')
 #define FTS_SYSFS_ECHO_OFF(buf)     (buf[0] == '0')

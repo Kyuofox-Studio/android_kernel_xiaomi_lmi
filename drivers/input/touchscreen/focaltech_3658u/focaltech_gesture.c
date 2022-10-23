@@ -3,7 +3,6 @@
  * FocalTech TouchScreen driver.
  *
  * Copyright (c) 2012-2020, Focaltech Ltd. All rights reserved.
- * Copyright (C) 2021-2022 XiaoMi, Inc.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -348,14 +347,13 @@ void fts_gesture_recovery(struct fts_ts_data *ts_data)
 {
 	if (ts_data->gesture_mode && ts_data->suspended) {
 		FTS_DEBUG("gesture recovery...");
-		//fts_write_reg(0xD1, 0xFF);
+		fts_write_reg(0xD1, 0xFF);
 		fts_write_reg(0xD2, 0xFF);
 		fts_write_reg(0xD5, 0xFF);
 		fts_write_reg(0xD6, 0xFF);
 		fts_write_reg(0xD7, 0xFF);
 		fts_write_reg(0xD8, 0xFF);
 		fts_write_reg(FTS_REG_GESTURE_EN, ENABLE);
-		fts_write_reg(FTS_GESTURE_CTRL, ts_data->gesture_cmd);
 	}
 }
 
@@ -370,14 +368,13 @@ int fts_gesture_suspend(struct fts_ts_data *ts_data)
 	}
 
 	for (i = 0; i < 5; i++) {
-		//fts_write_reg(0xD1, 0xFF);
+		fts_write_reg(0xD1, 0xFF);
 		fts_write_reg(0xD2, 0xFF);
 		fts_write_reg(0xD5, 0xFF);
 		fts_write_reg(0xD6, 0xFF);
 		fts_write_reg(0xD7, 0xFF);
 		fts_write_reg(0xD8, 0xFF);
 		fts_write_reg(FTS_REG_GESTURE_EN, ENABLE);
-		fts_write_reg(FTS_GESTURE_CTRL, ts_data->gesture_cmd);
 		msleep(1);
 		fts_read_reg(FTS_REG_GESTURE_EN, &state);
 		if (state == ENABLE)
