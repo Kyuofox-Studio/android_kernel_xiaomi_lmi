@@ -101,8 +101,6 @@ source "drivers/hid/Kconfig"
 
 source "drivers/usb/Kconfig"
 
-source "drivers/usb_dagu/Kconfig"
-
 source "drivers/uwb/Kconfig"
 
 source "drivers/mmc/Kconfig"
