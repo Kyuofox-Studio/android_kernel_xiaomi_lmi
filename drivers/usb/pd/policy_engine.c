@@ -1088,9 +1088,14 @@ static int pd_eval_src_caps(struct usbpd *pd)
 	/* Select thr first PDO for zimi adapter*/
 	if (pd->batt_2s && pd->adapter_id == 0xA819)
 		pd_select_pdo(pd, 2, 0, 0);
-	else if (pd->request_reject == 1)
-		;
-	else
+	else if (pd->request_reject == 1) {
+		if (pd->rdo == 0) {
+			usbpd_err(&pd->dev, "Invalid rdo, first pdo %08x\n", first_pdo);
+			pd_select_pdo(pd, 1, 0, 0);
+		}
+		usbpd_err(&pd->dev, "request reject setted!\n");
+		pd_select_pdo(pd, 1, 0, 0);
+	} else
 		pd_select_pdo(pd, 1, 0, 0);
 
 	return 0;
@@ -1107,6 +1112,7 @@ static void pd_send_hard_reset(struct usbpd *pd)
 	pd_phy_signal(HARD_RESET_SIG);
 	pd->in_pr_swap = false;
 	pd->pd_connected = false;
+	pd->request_reject = false;
 	reset_vdm_state(pd);
 	power_supply_set_property(pd->usb_psy, POWER_SUPPLY_PROP_PR_SWAP, &val);
 }
@@ -3734,6 +3740,7 @@ static void handle_disconnect(struct usbpd *pd)
 	pd->last_uv = 0;
 	pd->last_ua = 0;
 	pd->force_update = false;
+	pd->request_reject = false;
 	pd->peer_usb_comm = pd->peer_pr_swap = pd->peer_dr_swap = false;
 	memset(&pd->received_pdos, 0, sizeof(pd->received_pdos));
 	rx_msg_cleanup(pd);
@@ -5617,6 +5624,7 @@ static void usbpd_pdo_workfunc(struct work_struct *w)
 	union power_supply_propval val = {0};
 	int pps_max_watts = 0;
 	int pps_max_mwatt = 0;
+	int pps_max_update = 0;
 
 	for (i = 0; i < ARRAY_SIZE(pd->received_pdos); i++) {
 		u32 pdo = pd->received_pdos[i];
@@ -5644,7 +5652,11 @@ static void usbpd_pdo_workfunc(struct work_struct *w)
 					pd->is_support_2s = true;
 			}
 			if (pps_max_watts < max_volt * max_curr) {
-				pps_max_watts = max_volt * max_curr;
+				pps_max_update = 1;
+				if(max_volt >= 20000 && !pd->batt_2s)
+					pps_max_update = 0;
+				if(pps_max_update)
+					pps_max_watts = max_volt * max_curr;
 				if(pps_max_watts >120000000 && pps_max_watts < 130000000)
 					pps_max_watts = 120000000;
 				if (pps_max_watts < USBPD_WEAK_PPS_POWER) {
